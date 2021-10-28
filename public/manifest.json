@@ -1,30 +1,20 @@
 {
   "manifest_version": 2,
-  "name": "Extension Name",
+  "name": "Keyword Marker",
+  "description": "A rich extension example: Marks specific keywords on specific (StackExchange) sites",
   "version": "0.1",
-  "description": "Some Description",
-  "permissions": [
-  ],
+  "permissions": ["storage"],
   "background": {
-    "scripts": ["static/js/background.js"]
+    "scripts": ["static/js/background.js"],
+    "persistent": true
   },
-  "content_scripts": [{
-    "js": [ "static/js/content.js" ],
-    "matches": [
-      "http://*.example.com/*", "https://*.example.com/*"
-    ]
-  }],
-  "icons": {
-    "192": "logo192.png"
-  },
+
   "browser_action": {
-    "default_icon": {
-      "192": "logo192.png"
-    },
-    "default_title": "Popup",
+    "default_title": "Keyword Marker",
     "default_popup": "popup.html"
   },
   "options_ui": {
-    "page": "options.html"
+    "page": "options.html",
+    "open_in_tab": true
   }
 }

@@ -3,10 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "crypto-js": "^4.1.1",
+    "ethers": "^5.5.1",
+    "history": "^4.10.1",
     "react": "^17.0.2",
     "react-app-rewired": "^2.0",
     "react-dom": "^17.0.2",
-    "react-scripts": "4.0.3"
+    "react-redux": "^7.2.6",
+    "react-router-dom": "^5.3.0",
+    "react-scripts": "4.0.3",
+    "redux": "^4.1.1",
+    "redux-persist": "^6.0.0",
+    "redux-persist-transform-encrypt": "^3.0.1",
+    "reduxed-chrome-storage": "^2.4.7",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^2.0.4",
+    "web3": "^1.6.0"
   },
   "scripts": {
     "start": "react-scripts start",

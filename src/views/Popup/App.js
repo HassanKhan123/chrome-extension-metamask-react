@@ -1,25 +1,26 @@
-import React from 'react'
-import './App.css'
+import React from 'react';
+import { createMemoryHistory /* , createBrowserHistory */ } from 'history';
+import { Switch, Route, BrowserRouter } from 'react-router-dom';
+
+import Welcome from './Welcome';
+import CreatePassword from './CreatePassword';
+import Seedphrase from './SeedPhrase';
+import Dashboard from './Dashboard';
+
+import './App.css';
 
 function App() {
+  const history = createMemoryHistory();
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>Popup page</p>
-        <p>
-          Edit <code>src/views/Popup/App.js</code> and save.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter history={history}>
+      <Switch>
+        <Route path='/popup.html' component={Welcome} />
+        <Route path='/create-password' component={CreatePassword} />
+        <Route path='/seed-phrase' component={Seedphrase} />
+        <Route path='/dashboard' component={Dashboard} />
+      </Switch>
+    </BrowserRouter>
   );
 }
 
-export default App
+export default App;
