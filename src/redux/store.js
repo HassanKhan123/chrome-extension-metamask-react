@@ -19,7 +19,7 @@ const persistConfig = {
   // storage,
   // storage: storageSession,
   storage,
-  whitelist: ['walletEncrypted'],
+  // whitelist: ['walletEncrypted'],
 };
 // persistConfig.transforms = transforms;
 const persistedReducer = persistReducer(persistConfig, rootReducer);

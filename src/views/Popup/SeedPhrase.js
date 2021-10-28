@@ -1,12 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import { CREATE_WALLET } from '../../redux/actionTypes';
+import { decrypt } from '../../utils/utils';
 
 const Seedphrase = props => {
   const { history } = props;
-  const wallet = useSelector(({ wallet }) => wallet?.wallet);
+  const [mnemonics, setMnemonics] = useState('');
+  const { data, hashedPassword } = useSelector(
+    ({ walletEncrypted }) => walletEncrypted?.walletEncrypted
+  );
+
+  console.log('REDUX===', data, hashedPassword);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -16,14 +22,20 @@ const Seedphrase = props => {
         isLoggedIn: true,
       },
     });
+
+    (async () => {
+      const { mnemonic } = await decrypt(data, hashedPassword);
+      console.log('MN===', mnemonic);
+      setMnemonics(mnemonic.phrase);
+    })();
   }, []);
 
-  console.log('WALLET=========', wallet?.mnemonic);
+  // console.log('WALLET=========', wallet?.mnemonic);
 
   return (
     <div>
       <h1>Seed Phrase</h1>
-      <h2>{wallet?.mnemonic}</h2>
+      <h2>{mnemonics}</h2>
 
       <Link to='/dashboard'>
         <button>Next</button>

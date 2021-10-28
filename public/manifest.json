@@ -3,7 +3,7 @@
   "name": "Keyword Marker",
   "description": "A rich extension example: Marks specific keywords on specific (StackExchange) sites",
   "version": "0.1",
-  "permissions": ["storage"],
+  "permissions": ["storage", "background"],
   "background": {
     "scripts": ["static/js/background.js"],
     "persistent": true

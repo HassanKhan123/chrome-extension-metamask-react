@@ -1,4 +1,4 @@
-import { CREATE_WALLET_ENCRYPTED } from '../actionTypes';
+import { CREATE_WALLET_ENCRYPTED, REMOVE_MNEMONIC } from '../actionTypes';
 
 const initialState = {
   walletEncrypted: null,
@@ -13,6 +13,15 @@ export default function (state = initialState, action) {
         walletEncrypted: {
           ...state.walletEncrypted,
           ...payload,
+        },
+      };
+
+    case REMOVE_MNEMONIC:
+      return {
+        ...state,
+        wallet: {
+          ...state.walletEncrypted,
+          mnemonic: null,
         },
       };
 
