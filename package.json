@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ethereumjs/tx": "^3.3.2",
     "crypto-js": "^4.1.1",
+    "ethereumjs-tx": "^2.1.2",
     "ethers": "^5.5.1",
     "history": "^4.10.1",
     "react": "^17.0.2",
