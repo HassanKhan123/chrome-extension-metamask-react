@@ -16,10 +16,12 @@ const Dashboard = () => {
   const [seedPhrase, setSeedPhrase] = useState('');
   const [balance, setBalance] = useState('');
   const [network, setNetwork] = useState('rinkeby');
+  const [encryptedData, setEncryptedData] = useState('');
+  const [encryptedPassword, setEncryptedPassword] = useState('');
 
-  const { data, hashedPassword } = useSelector(
-    ({ walletEncrypted }) => walletEncrypted?.walletEncrypted
-  );
+  // const { data, hashedPassword } = useSelector(
+  //   ({ walletEncrypted }) => walletEncrypted?.walletEncrypted
+  // );
 
   useEffect(() => {
     // var customHttpProvider = new ethers.providers.JsonRpcProvider(
@@ -45,33 +47,44 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    (async () => {
-      const { publicKey, address, privateKey, mnemonic } = await decrypt(
-        data,
-        hashedPassword
+    chrome.storage.sync.get(['data'], async ({ data }) => {
+      console.log('Value currently is ' + data);
+      setEncryptedData(data);
+
+      chrome.storage.sync.get(
+        ['hashedPassword'],
+        async ({ hashedPassword }) => {
+          console.log('Value currently is ' + hashedPassword);
+          setEncryptedPassword(hashedPassword);
+
+          const { publicKey, address, privateKey, mnemonic } = await decrypt(
+            data,
+            hashedPassword
+          );
+          setPublicKey(publicKey);
+          setAddress(address);
+          setPrivateKey(privateKey);
+          setSeedPhrase(mnemonic.phrase);
+        }
       );
-      setPublicKey(publicKey);
-      setAddress(address);
-      setPrivateKey(privateKey);
-      setSeedPhrase(mnemonic.phrase);
-    })();
+    });
   }, []);
 
   let provider;
 
-  useEffect(() => {
-    (async () => {
-      try {
-        provider = ethers.getDefaultProvider(network);
-        provider.getBlockWithTransactions();
-        console.log('PROVIDER', provider);
-        const balance = await provider.getBalance(address);
-        setBalance(ethers.utils.formatEther(balance));
-      } catch (error) {
-        console.log('ERR===', error);
-      }
-    })();
-  }, [network, balance]);
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       provider = ethers.getDefaultProvider(network);
+  //       provider.getBlockWithTransactions();
+  //       console.log('PROVIDER', provider);
+  //       const balance = await provider.getBalance(address);
+  //       setBalance(ethers.utils.formatEther(balance));
+  //     } catch (error) {
+  //       console.log('ERR===', error);
+  //     }
+  //   })();
+  // }, [network, balance]);
 
   // useEffect(() => {
   //   //get the Provider Etherscan
@@ -94,7 +107,7 @@ const Dashboard = () => {
         value: ethers.utils.parseEther('0.00005'),
       };
 
-      const walletMneomnic = await decrypt(data, hashedPassword);
+      const walletMneomnic = await decrypt(encryptedData, encryptedPassword);
 
       await walletMneomnic.signTransaction(tx);
       let wallet = walletMneomnic.connect(provider);

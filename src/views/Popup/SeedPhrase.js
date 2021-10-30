@@ -8,29 +8,40 @@ import { decrypt } from '../../utils/utils';
 const Seedphrase = props => {
   const { history } = props;
   const [mnemonics, setMnemonics] = useState('');
-  const { data, hashedPassword } = useSelector(
-    ({ walletEncrypted }) => walletEncrypted?.walletEncrypted
-  );
+  const [encryptedData, setEncryptedData] = useState('');
+  const [encryptedPassword, setEncryptedPassword] = useState('');
 
-  console.log('REDUX===', data, hashedPassword);
+  // const { data, hashedPassword } = useSelector(
+  //   ({ walletEncrypted }) => walletEncrypted?.walletEncrypted
+  // );
+
+  // console.log('REDUX===', data, hashedPassword);
   const dispatch = useDispatch();
 
   useEffect(() => {
+    chrome.storage.sync.get(['data'], async ({ data }) => {
+      console.log('Value currently is ' + data);
+      setEncryptedData(data);
+      chrome.storage.sync.get(
+        ['hashedPassword'],
+        async ({ hashedPassword }) => {
+          console.log('Value currently is ' + hashedPassword);
+          setEncryptedPassword(hashedPassword);
+
+          const { mnemonic } = await decrypt(data, hashedPassword);
+          console.log('MN===', mnemonic);
+          setMnemonics(mnemonic.phrase);
+        }
+      );
+    });
+
     dispatch({
       type: CREATE_WALLET,
       payload: {
         isLoggedIn: true,
       },
     });
-
-    (async () => {
-      const { mnemonic } = await decrypt(data, hashedPassword);
-      console.log('MN===', mnemonic);
-      setMnemonics(mnemonic.phrase);
-    })();
   }, []);
-
-  // console.log('WALLET=========', wallet?.mnemonic);
 
   return (
     <div>

@@ -20,8 +20,8 @@ const Recover = () => {
     dispatch({
       type: IMPORT_WALLET,
       payload: {
-        hashedPassword,
-        data: encryptPromise,
+        // hashedPassword,
+        // data: encryptPromise,
         walletImported: true,
       },
     });
@@ -31,6 +31,13 @@ const Recover = () => {
       payload: {
         isLoggedIn: true,
       },
+    });
+
+    chrome.storage.sync.set({ data: encryptPromise }, () => {
+      console.log('Value is set to Data ' + encryptPromise);
+    });
+    chrome.storage.sync.set({ hashedPassword }, () => {
+      console.log('Value is set to hashed Password ' + hashedPassword);
     });
 
     history.push('/dashboard');

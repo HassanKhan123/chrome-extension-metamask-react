@@ -27,14 +27,20 @@ const CreatePassword = () => {
 
     console.log('ENCRYOPTED====', encryptPromise);
 
-    dispatch({
-      type: CREATE_WALLET_ENCRYPTED,
-      payload: {
-        hashedPassword,
-        data: encryptPromise,
-        walletCreated: true,
-      },
+    chrome.storage.sync.set({ data: encryptPromise }, () => {
+      console.log('Value is set to Data ' + encryptPromise);
     });
+    chrome.storage.sync.set({ hashedPassword }, () => {
+      console.log('Value is set to hashed Password ' + hashedPassword);
+    });
+    // dispatch({
+    //   type: CREATE_WALLET_ENCRYPTED,
+    //   payload: {
+    //     hashedPassword,
+    //     data: encryptPromise,
+    //     walletCreated: true,
+    //   },
+    // });
 
     history.push('/seed-phrase');
     // let decryptData = await ethers.Wallet.fromEncryptedJson(
