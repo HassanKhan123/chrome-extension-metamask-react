@@ -27,12 +27,25 @@ const CreatePassword = () => {
 
     console.log('ENCRYOPTED====', encryptPromise);
 
-    chrome.storage.sync.set({ data: encryptPromise }, () => {
-      console.log('Value is set to Data ' + encryptPromise);
-    });
-    chrome.storage.sync.set({ hashedPassword }, () => {
-      console.log('Value is set to hashed Password ' + hashedPassword);
-    });
+    let isChrome =
+      !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+    console.log('IS CHROME=================', isChrome);
+
+    if (isChrome) {
+      chrome.storage.sync.set({ data: encryptPromise }, () => {
+        console.log('Value is set to Data ' + encryptPromise);
+      });
+      chrome.storage.sync.set({ hashedPassword }, () => {
+        console.log('Value is set to hashed Password ' + hashedPassword);
+      });
+    } else {
+      browser.storage.sync.set({ data: encryptPromise }, () => {
+        console.log('Value is set to Data ' + encryptPromise);
+      });
+      browser.storage.sync.set({ hashedPassword }, () => {
+        console.log('Value is set to hashed Password ' + hashedPassword);
+      });
+    }
     // dispatch({
     //   type: CREATE_WALLET_ENCRYPTED,
     //   payload: {

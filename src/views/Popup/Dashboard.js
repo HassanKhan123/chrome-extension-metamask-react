@@ -47,27 +47,55 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    chrome.storage.sync.get(['data'], async ({ data }) => {
-      console.log('Value currently is ' + data);
-      setEncryptedData(data);
+    let isChrome =
+      !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+    console.log('IS CHROME=================', isChrome);
 
-      chrome.storage.sync.get(
-        ['hashedPassword'],
-        async ({ hashedPassword }) => {
-          console.log('Value currently is ' + hashedPassword);
-          setEncryptedPassword(hashedPassword);
+    if (isChrome) {
+      chrome.storage.sync.get(['data'], async ({ data }) => {
+        console.log('Value currently is ' + data);
+        setEncryptedData(data);
 
-          const { publicKey, address, privateKey, mnemonic } = await decrypt(
-            data,
-            hashedPassword
-          );
-          setPublicKey(publicKey);
-          setAddress(address);
-          setPrivateKey(privateKey);
-          setSeedPhrase(mnemonic.phrase);
-        }
-      );
-    });
+        chrome.storage.sync.get(
+          ['hashedPassword'],
+          async ({ hashedPassword }) => {
+            console.log('Value currently is ' + hashedPassword);
+            setEncryptedPassword(hashedPassword);
+
+            const { publicKey, address, privateKey, mnemonic } = await decrypt(
+              data,
+              hashedPassword
+            );
+            setPublicKey(publicKey);
+            setAddress(address);
+            setPrivateKey(privateKey);
+            setSeedPhrase(mnemonic.phrase);
+          }
+        );
+      });
+    } else {
+      browser.storage.sync.get(['data'], async ({ data }) => {
+        console.log('Value currently is ' + data);
+        setEncryptedData(data);
+
+        browser.storage.sync.get(
+          ['hashedPassword'],
+          async ({ hashedPassword }) => {
+            console.log('Value currently is ' + hashedPassword);
+            setEncryptedPassword(hashedPassword);
+
+            const { publicKey, address, privateKey, mnemonic } = await decrypt(
+              data,
+              hashedPassword
+            );
+            setPublicKey(publicKey);
+            setAddress(address);
+            setPrivateKey(privateKey);
+            setSeedPhrase(mnemonic.phrase);
+          }
+        );
+      });
+    }
   }, []);
 
   let provider;

@@ -32,13 +32,25 @@ const Recover = () => {
         isLoggedIn: true,
       },
     });
+    let isChrome =
+      !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+    console.log('IS CHROME=================', isChrome);
 
-    chrome.storage.sync.set({ data: encryptPromise }, () => {
-      console.log('Value is set to Data ' + encryptPromise);
-    });
-    chrome.storage.sync.set({ hashedPassword }, () => {
-      console.log('Value is set to hashed Password ' + hashedPassword);
-    });
+    if (isChrome) {
+      chrome.storage.sync.set({ data: encryptPromise }, () => {
+        console.log('Value is set to Data ' + encryptPromise);
+      });
+      chrome.storage.sync.set({ hashedPassword }, () => {
+        console.log('Value is set to hashed Password ' + hashedPassword);
+      });
+    } else {
+      browser.storage.sync.set({ data: encryptPromise }, () => {
+        console.log('Value is set to Data ' + encryptPromise);
+      });
+      browser.storage.sync.set({ hashedPassword }, () => {
+        console.log('Value is set to hashed Password ' + hashedPassword);
+      });
+    }
 
     history.push('/dashboard');
   };

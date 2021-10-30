@@ -19,21 +19,43 @@ const Seedphrase = props => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    chrome.storage.sync.get(['data'], async ({ data }) => {
-      console.log('Value currently is ' + data);
-      setEncryptedData(data);
-      chrome.storage.sync.get(
-        ['hashedPassword'],
-        async ({ hashedPassword }) => {
-          console.log('Value currently is ' + hashedPassword);
-          setEncryptedPassword(hashedPassword);
+    let isChrome =
+      !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+    console.log('IS CHROME=================', isChrome);
 
-          const { mnemonic } = await decrypt(data, hashedPassword);
-          console.log('MN===', mnemonic);
-          setMnemonics(mnemonic.phrase);
-        }
-      );
-    });
+    if (isChrome) {
+      chrome.storage.sync.get(['data'], async ({ data }) => {
+        console.log('Value currently is ' + data);
+        setEncryptedData(data);
+        chrome.storage.sync.get(
+          ['hashedPassword'],
+          async ({ hashedPassword }) => {
+            console.log('Value currently is ' + hashedPassword);
+            setEncryptedPassword(hashedPassword);
+
+            const { mnemonic } = await decrypt(data, hashedPassword);
+            console.log('MN===', mnemonic);
+            setMnemonics(mnemonic.phrase);
+          }
+        );
+      });
+    } else {
+      browser.storage.sync.get(['data'], async ({ data }) => {
+        console.log('Value currently is ' + data);
+        setEncryptedData(data);
+        browser.storage.sync.get(
+          ['hashedPassword'],
+          async ({ hashedPassword }) => {
+            console.log('Value currently is ' + hashedPassword);
+            setEncryptedPassword(hashedPassword);
+
+            const { mnemonic } = await decrypt(data, hashedPassword);
+            console.log('MN===', mnemonic);
+            setMnemonics(mnemonic.phrase);
+          }
+        );
+      });
+    }
 
     dispatch({
       type: CREATE_WALLET,
