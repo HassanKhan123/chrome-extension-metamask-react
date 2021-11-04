@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@ethereumjs/tx": "^3.3.2",
+    "axios": "^0.24.0",
     "crypto-js": "^4.1.1",
     "ethereumjs-tx": "^2.1.2",
     "ethers": "^5.5.1",
