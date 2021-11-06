@@ -9,6 +9,7 @@ import Dashboard from './Dashboard';
 import Recover from './Recover';
 
 import './App.css';
+import customToken from './customToken';
 
 function App() {
   const history = createMemoryHistory();
@@ -20,6 +21,7 @@ function App() {
         <Route path='/seed-phrase' component={Seedphrase} />
         <Route path='/dashboard' component={Dashboard} />
         <Route path='/recover' component={Recover} />
+        <Route path='/create-token' component={customToken} />
       </Switch>
     </BrowserRouter>
   );

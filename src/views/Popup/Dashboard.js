@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { ethers, Signer } from 'ethers';
 import Tx from '@ethereumjs/tx';
 import Web3 from 'web3';
 
-import { decrypt, fetchERC20Balance } from '../../utils/utils';
+import {
+  decrypt,
+  fetchERC20Balance,
+  fetchERC20TokenInfo,
+  fetchERC20TxHistory,
+  fetchETHBalance,
+  fetchTxHistory,
+} from '../../utils/utils';
 import { abi } from '../../erc720/abi.json';
 import { interfaceABI } from '../../erc721/abi.json';
 import { fetchRates } from '../../utils/utils';
@@ -21,12 +29,25 @@ const Dashboard = () => {
   const [address, setAddress] = useState('');
   const [seedPhrase, setSeedPhrase] = useState('');
   const [balance, setBalance] = useState(0);
-  const [network, setNetwork] = useState('rinkeby');
+  const [network, setNetwork] = useState('homestead');
   const [encryptedData, setEncryptedData] = useState('');
   const [encryptedPassword, setEncryptedPassword] = useState('');
   const [totalBalance, setTotalBalance] = useState(0);
   const [ethBalance, setEthBalance] = useState(0);
+  const [ethUsdPrice, setEthUSDPrice] = useState(0);
   const [linkBalance, setLinkBalance] = useState(0);
+  const [txHistory, setTxHistory] = useState([]);
+  const [customTokens, setCustomTokens] = useState([]);
+
+  useEffect(() => {
+    chrome.storage.sync.get(['tokens'], async ({ tokens }) => {
+      console.log('TOKENS==============', tokens);
+      if (tokens) {
+        // const getCustomTokenData = await fetchERC20TokenInfo(address)
+        setCustomTokens(tokens);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     let isChrome =
@@ -86,29 +107,57 @@ const Dashboard = () => {
     (async () => {
       try {
         if (network && address) {
-          console.log('NETWORK====', network);
-          provider = ethers.getDefaultProvider(network);
-          provider.getBlockWithTransactions();
-          console.log('PROVIDER', provider);
-          const balance = await provider.getBalance(address);
-          setBalance(ethers.utils.formatEther(balance));
-          setEthBalance(ethers.utils.formatEther(balance));
+          // console.log('NETWORK====', network);
+          // provider = ethers.getDefaultProvider(network);
+          // provider.getBlockWithTransactions();
+          // console.log('PROVIDER', provider);
 
-          const linkBal = await fetchERC20Balance(
-            address,
-            LINK_CONTRACT_ADDRESS
-          );
-          console.log('LINK====', linkBal);
-          setLinkBalance(ethers.utils.formatUnits(linkBal.result));
-          const ethRate = await fetchRates('ethereum');
-          const linkRate = await fetchRates('chainlink');
-          // console.log('RATE====', ethRate.ethereum.usd * balance);
+          let sum = 0;
+          if (customTokens.length > 0) {
+            let tk = await Promise.all(
+              customTokens.map(async ctx => {
+                const linkBal = await fetchERC20Balance(
+                  address,
+                  ctx.contractAddress,
+                  network
+                );
+
+                const usdPrice = await fetchRates(ctx.symbol, network);
+
+                console.log('LIN============', linkBal);
+                sum += ethers.utils.formatUnits(linkBal.result) * usdPrice;
+
+                return {
+                  ...ctx,
+                  balance: ethers.utils.formatUnits(linkBal.result),
+                  usdPrice,
+                  balanceInUSD:
+                    ethers.utils.formatUnits(linkBal.result) * usdPrice,
+                };
+              })
+            );
+
+            console.log('CUST=========', tk);
+
+            setCustomTokens(tk);
+          }
+
+          console.log('SUM==============', sum);
+          const ethRate = await fetchRates('ethereum', network);
+          setEthUSDPrice(ethRate);
+          const balance = await fetchETHBalance(address, network);
+          setBalance(ethers.utils.formatUnits(balance.result));
+          setEthBalance(ethers.utils.formatUnits(balance.result));
+
           setTotalBalance(
-            // ethers.utils.formatUnits(
-            ethRate.ethereum.usd * ethers.utils.formatEther(balance) +
-              linkRate.chainlink.usd * ethers.utils.formatUnits(linkBal.result)
-            // )
+            sum + ethRate * ethers.utils.formatUnits(balance.result)
           );
+          // const linkRate = await fetchRates('chainlink');
+
+          // setTotalBalance(
+          //   ethRate.ethereum.usd * ethers.utils.formatEther(balance) +
+          //     linkRate.chainlink.usd * ethers.utils.formatUnits(linkBal.result)
+          // );
         }
       } catch (error) {
         console.log('ERROR===', error);
@@ -133,6 +182,17 @@ const Dashboard = () => {
   //     });
   //   }
   // }, [network, address]);
+
+  useEffect(() => {
+    if (address) {
+      (async () => {
+        const txHist = await fetchTxHistory(address, network);
+        const txERC20Hist = await fetchERC20TxHistory(address, network);
+
+        setTxHistory([...txHist.result, ...txERC20Hist.result]);
+      })();
+    }
+  }, [address, network]);
 
   const sendTransaction = async () => {
     try {
@@ -262,21 +322,31 @@ const Dashboard = () => {
       <h3>Address: {address}</h3>
       <h3>SEED PHRASE: {seedPhrase}</h3>
       <select onChange={e => setNetwork(e.target.value)}>
-        <option value='rinkeby'>Rinkeby</option>
         <option value='homestead'>Ethereum Mainnet</option>
-        <option value='ropsten'>Ropsten</option>
-        <option value='kovan'>Kovan</option>
-        <option value='goerli'>Goerili</option>
+        <option value='rinkeby'>Rinkeby</option>
       </select>
       <p>Current Network: {network}</p>
       {/* <p>Your Total ETH in USD: ${totalBalance}</p> */}
       <p>ETH BALANCE: {ethBalance} ETH</p>
-      <p>LINK BALANCE: ${linkBalance} LINK</p>
+      <h1>Tokens In Wallet</h1>
+      {customTokens.map(ct => (
+        <p>
+          {ct?.balance} {ct.symbol}
+        </p>
+      ))}
+      {/* <p>LINK BALANCE: ${linkBalance} LINK</p> */}
       <p>TOTA BALANCE IN USD: ${totalBalance}</p>
+      <h2>TRANSACTION HISTORY</h2>
+
+      <p>{txHistory.length}</p>
 
       <button onClick={sendTransaction}>Send</button>
       <button onClick={connectLink}>LINK TOKEN</button>
       <button onClick={mintNFT}>Transfer NFT</button>
+
+      <Link to='/create-token'>
+        <button>Create Token</button>
+      </Link>
     </div>
   );
 };
