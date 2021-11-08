@@ -11,7 +11,7 @@ let web3;
 const CustomToken = () => {
   const history = useHistory();
   const [contractAddress, setContractAddress] = useState('');
-  const [decimal, setDecimal] = useState(0);
+  const [decimal, setDecimal] = useState();
   const [symbol, setSymbol] = useState('');
 
   const [address, setAddress] = useState('');

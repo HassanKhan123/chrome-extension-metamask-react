@@ -99,6 +99,7 @@ const Recover = () => {
         value={password}
         onChange={e => setPassword(e.target.value)}
         placeholder='Enter Password'
+        type='password'
       />
 
       <button onClick={onRecover}>Recover</button>

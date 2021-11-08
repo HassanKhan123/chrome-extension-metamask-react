@@ -97,7 +97,11 @@ const CreatePassword = () => {
   return (
     <div>
       <h1>Enter password</h1>
-      <input value={password} onChange={e => setPassword(e.target.value)} />
+      <input
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        type='password'
+      />
       <button onClick={createWallet}>Submit</button>
     </div>
   );

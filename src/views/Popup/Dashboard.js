@@ -33,7 +33,10 @@ const Dashboard = () => {
   const [encryptedData, setEncryptedData] = useState('');
   const [encryptedPassword, setEncryptedPassword] = useState('');
   const [totalBalance, setTotalBalance] = useState(0);
-  const [ethBalance, setEthBalance] = useState(0);
+  const [ethBalance, setEthBalance] = useState({
+    balance: 0,
+    balanceInUSD: 0,
+  });
   const [ethUsdPrice, setEthUSDPrice] = useState(0);
   const [linkBalance, setLinkBalance] = useState(0);
   const [txHistory, setTxHistory] = useState([]);
@@ -108,9 +111,6 @@ const Dashboard = () => {
       try {
         if (network && address) {
           // console.log('NETWORK====', network);
-          // provider = ethers.getDefaultProvider(network);
-          // provider.getBlockWithTransactions();
-          // console.log('PROVIDER', provider);
 
           let sum = 0;
           if (customTokens.length > 0) {
@@ -147,7 +147,10 @@ const Dashboard = () => {
           setEthUSDPrice(ethRate);
           const balance = await fetchETHBalance(address, network);
           setBalance(ethers.utils.formatUnits(balance.result));
-          setEthBalance(ethers.utils.formatUnits(balance.result));
+          setEthBalance({
+            balance: ethers.utils.formatUnits(balance.result),
+            balanceInUSD: ethRate * ethers.utils.formatUnits(balance.result),
+          });
 
           setTotalBalance(
             sum + ethRate * ethers.utils.formatUnits(balance.result)
@@ -195,9 +198,12 @@ const Dashboard = () => {
   }, [address, network]);
 
   const sendTransaction = async () => {
+    provider = ethers.getDefaultProvider(network);
+    provider.getBlockWithTransactions();
+    console.log('PROVIDER', provider);
     try {
       let tx = {
-        to: '0x9f3b9E55285A761b29C83959C81164a5A894767B',
+        to: '0x7365eAC43B90a8D2a98cf2BE32C69568b3b5C7A7',
         value: ethers.utils.parseEther('0.00005'),
       };
 
@@ -215,7 +221,8 @@ const Dashboard = () => {
         alert('nOT ENOUGH BALANCE');
       }
     } catch (error) {
-      console.log('ERROR=====', error);
+      console.log('ERROR IN SEND=====', error);
+      alert(error.message);
     }
   };
 
@@ -226,7 +233,10 @@ const Dashboard = () => {
       //   network
       // );
       // const signerAccount = ethProvider.getSigner();
-      let ethProvider = new ethers.providers.InfuraProvider(network);
+      let ethProvider = new ethers.providers.InfuraProvider(
+        network,
+        '2107de90a19f4dd69c0eef59805a707e'
+      );
       var wallet = ethers.Wallet.fromMnemonic(seedPhrase);
       // ethProvider.getSigner();
       wallet = wallet.connect(ethProvider);
@@ -242,14 +252,12 @@ const Dashboard = () => {
       console.log('ADDRESS============', ethers.utils.formatEther(balance));
       if (ethers.utils.formatEther(balance) > 0) {
         let transaction = contract.functions.transfer(
-          '0x9f3b9E55285A761b29C83959C81164a5A894767B',
+          '0x7365eAC43B90a8D2a98cf2BE32C69568b3b5C7A7',
           1
         );
-        let sendTransactionPromise = wallet.sendTransaction(transaction);
+        let sendTransactionPromise = await wallet.sendTransaction(transaction);
+        console.log('SEND TRANSACTION=============', sendTransactionPromise);
 
-        sendTransactionPromise.then(function (tx) {
-          console.log('TXXXXXXXXXXX================', tx);
-        });
         alert('link transfered');
       } else {
         alert('nOT ENOUGH BALANCE');
@@ -261,7 +269,8 @@ const Dashboard = () => {
       //   '0x01BE23585060835E02B77ef475b0Cc51aA1e0709'
       // );
     } catch (error) {
-      console.log('ERROR=========', error);
+      console.log('ERROR SENDING LINK=========', error);
+      alert(error.message);
     }
   };
 
@@ -327,22 +336,24 @@ const Dashboard = () => {
       </select>
       <p>Current Network: {network}</p>
       {/* <p>Your Total ETH in USD: ${totalBalance}</p> */}
-      <p>ETH BALANCE: {ethBalance} ETH</p>
+      <p>
+        ETH BALANCE: {ethBalance.balance} ETH (${ethBalance.balanceInUSD})
+      </p>
       <h1>Tokens In Wallet</h1>
       {customTokens.map(ct => (
         <p>
-          {ct?.balance} {ct.symbol}
+          {ct?.balance} {ct.symbol} (
+          {ct.balanceInUSD ? '$' + ct.balanceInUSD : '$0'})
         </p>
       ))}
       {/* <p>LINK BALANCE: ${linkBalance} LINK</p> */}
       <p>TOTA BALANCE IN USD: ${totalBalance}</p>
-      <h2>TRANSACTION HISTORY</h2>
-
+      <h2>TRANSACTION HISTORY:</h2>
       <p>{txHistory.length}</p>
 
-      <button onClick={sendTransaction}>Send</button>
-      <button onClick={connectLink}>LINK TOKEN</button>
-      <button onClick={mintNFT}>Transfer NFT</button>
+      <button onClick={sendTransaction}>Send ETH</button>
+      <button onClick={connectLink}>SEND LINK</button>
+      {/* <button onClick={mintNFT}>Transfer NFT</button> */}
 
       <Link to='/create-token'>
         <button>Create Token</button>

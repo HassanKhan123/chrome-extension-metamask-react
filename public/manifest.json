@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "Keyword Marker",
-  "description": "A rich extension example: Marks specific keywords on specific (StackExchange) sites",
+  "name": "Sonar Wallet",
+  "description": "Wallet to simply track your balance",
   "version": "0.1",
   "permissions": ["storage", "background"],
   "background": {
