@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { ethers } from 'ethers';
+
+import { abi } from '../erc720/abi.json';
 import {
   ETHERSCAN_API,
   ETHERSCAN_API_KEY,
@@ -65,4 +67,58 @@ export const fetchETHBalance = async (address, netowrk) => {
     `${BASEURL}?module=account&action=balance&&address=${address}&tag=latest&apikey=${ETHERSCAN_API_KEY}`
   );
   return data;
+};
+
+export const send_token = async (
+  contract_address,
+  send_token_amount,
+  to_address,
+  send_account,
+  private_key,
+  provider
+) => {
+  let wallet = new ethers.Wallet(private_key);
+  let walletSigner = wallet.connect(provider);
+
+  let currentGasPrice = await provider.getGasPrice();
+
+  let gas_price = ethers.utils.hexlify(parseInt(currentGasPrice));
+  console.log(` gas_price: ${gas_price} `);
+
+  if (contract_address) {
+    // general token send
+    let contract = new ethers.Contract(contract_address, abi, walletSigner);
+
+    // How many tokens?
+    let numberOfTokens = ethers.utils.parseUnits(send_token_amount, 18);
+    console.log(` numberOfTokens: ${numberOfTokens} `);
+
+    // Send tokens
+    let transferResult = await contract.functions.transfer(
+      to_address,
+      numberOfTokens
+    );
+
+    console.dir(transferResult);
+    alert('sent token');
+  } // ether send
+  else {
+    const tx = {
+      from: send_account,
+      to: to_address,
+      value: ethers.utils.parseEther(send_token_amount),
+      nonce: provider.getTransactionCount(send_account, 'latest'),
+      gasLimit: ethers.utils.hexlify('0x100000'), // 100000
+      gasPrice: gas_price,
+    };
+    console.dir(tx);
+    try {
+      let transaction = await walletSigner.sendTransaction(tx);
+
+      console.dir(transaction);
+      alert('Send finished!');
+    } catch (error) {
+      alert('failed to send !!');
+    }
+  }
 };

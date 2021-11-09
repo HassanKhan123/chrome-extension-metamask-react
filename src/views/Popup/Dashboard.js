@@ -12,6 +12,7 @@ import {
   fetchERC20TxHistory,
   fetchETHBalance,
   fetchTxHistory,
+  send_token,
 } from '../../utils/utils';
 import { abi } from '../../erc720/abi.json';
 import { interfaceABI } from '../../erc721/abi.json';
@@ -202,24 +203,34 @@ const Dashboard = () => {
     provider.getBlockWithTransactions();
     console.log('PROVIDER', provider);
     try {
-      let tx = {
-        to: '0x7365eAC43B90a8D2a98cf2BE32C69568b3b5C7A7',
-        value: ethers.utils.parseEther('0.00005'),
-      };
+      const send = await send_token(
+        '',
+        '0.0005',
+        '0x7365eAC43B90a8D2a98cf2BE32C69568b3b5C7A7',
+        address,
+        privateKey,
+        provider
+      );
 
-      const walletMneomnic = await decrypt(encryptedData, encryptedPassword);
+      console.log('SEND====', send);
+      // let tx = {
+      //   to: '0x7365eAC43B90a8D2a98cf2BE32C69568b3b5C7A7',
+      //   value: ethers.utils.parseEther('0.00005'),
+      // };
 
-      await walletMneomnic.signTransaction(tx);
-      let wallet = walletMneomnic.connect(provider);
-      if (balance > 0) {
-        let tr = await wallet.sendTransaction(tx);
-        console.log('TRANS===========', tr);
-        setBalance(balance);
+      // const walletMneomnic = await decrypt(encryptedData, encryptedPassword);
 
-        alert('Send finished!');
-      } else {
-        alert('nOT ENOUGH BALANCE');
-      }
+      // await walletMneomnic.signTransaction(tx);
+      // let wallet = walletMneomnic.connect(provider);
+      // if (balance > 0) {
+      //   let tr = await wallet.sendTransaction(tx);
+      //   console.log('TRANS===========', tr);
+      //   setBalance(balance);
+
+      //   alert('Send finished!');
+      // } else {
+      //   alert('nOT ENOUGH BALANCE');
+      // }
     } catch (error) {
       console.log('ERROR IN SEND=====', error);
       alert(error.message);
@@ -228,46 +239,47 @@ const Dashboard = () => {
 
   const connectLink = async () => {
     try {
-      // const ethProvider = new ethers.providers.JsonRpcProvider(
-      //   provider,
-      //   network
-      // );
-      // const signerAccount = ethProvider.getSigner();
       let ethProvider = new ethers.providers.InfuraProvider(
         network,
         '2107de90a19f4dd69c0eef59805a707e'
       );
-      var wallet = ethers.Wallet.fromMnemonic(seedPhrase);
-      // ethProvider.getSigner();
-      wallet = wallet.connect(ethProvider);
+      // provider = ethers.getDefaultProvider(network);
+      // provider.getBlockWithTransactions();
+      console.log('PROVIDER', ethProvider);
+      // var wallet = ethers.Wallet.fromMnemonic(seedPhrase);
+      // wallet = wallet.connect(ethProvider);
 
-      const contract = new ethers.Contract(
+      let tranfer = await send_token(
         LINK_CONTRACT_ADDRESS,
-        abi,
-        wallet
-        // signerAccount
+        '0.1',
+        '0x7365eAC43B90a8D2a98cf2BE32C69568b3b5C7A7',
+        address,
+        privateKey,
+        ethProvider
       );
+      console.log('TRANSFER=====', tranfer);
 
-      let balance = await contract.balanceOf(address);
-      console.log('ADDRESS============', ethers.utils.formatEther(balance));
-      if (ethers.utils.formatEther(balance) > 0) {
-        let transaction = contract.functions.transfer(
-          '0x7365eAC43B90a8D2a98cf2BE32C69568b3b5C7A7',
-          1
-        );
-        let sendTransactionPromise = await wallet.sendTransaction(transaction);
-        console.log('SEND TRANSACTION=============', sendTransactionPromise);
-
-        alert('link transfered');
-      } else {
-        alert('nOT ENOUGH BALANCE');
-      }
-      // Contract.setProvider(provider);
-
-      // var contract = new Contract(
+      // const contract = new ethers.Contract(
+      //   LINK_CONTRACT_ADDRESS,
       //   abi,
-      //   '0x01BE23585060835E02B77ef475b0Cc51aA1e0709'
+      //   wallet
       // );
+
+      // let balance = await contract.balanceOf(address);
+      // console.log('ADDRESS============', ethers.utils.formatEther(balance));
+      // if (ethers.utils.formatUnits(balance) > 0) {
+      //   let transaction = await contract.functions.transfer(
+      //     '0x7365eAC43B90a8D2a98cf2BE32C69568b3b5C7A7',
+      //     ethers.utils.formatUnits()
+      //   );
+      //   console.log('TRANSACTION================', transaction);
+      //   let sendTransactionPromise = await wallet.sendTransaction(transaction);
+      //   console.log('SEND TRANSACTION=============', sendTransactionPromise);
+
+      //   alert('link transfered');
+      // } else {
+      //   alert('nOT ENOUGH BALANCE');
+      // }
     } catch (error) {
       console.log('ERROR SENDING LINK=========', error);
       alert(error.message);
